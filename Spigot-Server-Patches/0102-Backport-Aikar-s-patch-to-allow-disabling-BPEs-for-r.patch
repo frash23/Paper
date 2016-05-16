@@ -33,7 +33,7 @@ index 8752955..bdeb29f 100644
                              try {
                                  iblockdata.getBlock().b((World) this, nextticklistentry.a, iblockdata, this.random);
                              } catch (Throwable throwable) {
-+								stopPhysicsEvent = !paperConfig.firePhysicsEventForRedstone && (iblockdata.getBlock() instanceof BlockDiodeAbstract || iblockdata.getBlock() instanceof BlockRedstoneTorch); // Parcot - Add option to disable BlockPhysicsEvent for redstone
++                                stopPhysicsEvent = !paperSpigotConfig.firePhysicsEventForRedstone && (iblockdata.getBlock() instanceof BlockDiodeAbstract || iblockdata.getBlock() instanceof BlockRedstoneTorch); // Parcot - Add option to disable BlockPhysicsEvent for redstone
                                  CrashReport crashreport = CrashReport.a(throwable, "Exception while ticking a block");
                                  CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Block being ticked");
  
