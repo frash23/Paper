@@ -1,4 +1,4 @@
-From de318853ad92b4278a4d6b720b4d36219983f5f3 Mon Sep 17 00:00:00 2001
+From 8dbfc2406aa4e517296698b60e429ddfa18c25f9 Mon Sep 17 00:00:00 2001
 From: frash23 <jacob@bytesizedpacket.com>
 Date: Mon, 16 May 2016 20:22:23 +0200
 Subject: [PATCH] Backport Aikar's patch to allow disabling BPEs for redstone
@@ -18,7 +18,7 @@ index 8f3511f..a40e84e 100644
                      this.getServer().getPluginManager().callEvent(event);
  
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 8752955..bdeb29f 100644
+index 8752955..e99982c 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -32,6 +32,7 @@ import org.bukkit.event.weather.LightningStrikeEvent;
@@ -61,3 +61,4 @@ index 67e56df..e910431 100644
  }
 -- 
 2.8.2
+
