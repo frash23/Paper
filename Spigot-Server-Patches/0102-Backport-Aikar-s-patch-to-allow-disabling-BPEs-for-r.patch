@@ -1,0 +1,64 @@
+From de318853ad92b4278a4d6b720b4d36219983f5f3 Mon Sep 17 00:00:00 2001
+From: frash23 <jacob@bytesizedpacket.com>
+Date: Mon, 16 May 2016 20:22:23 +0200
+Subject: [PATCH] Backport Aikar's patch to allow disabling BPEs for redstone
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 8f3511f..a40e84e 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -571,7 +571,7 @@ public abstract class World implements IBlockAccess {
+             try {
+                 // CraftBukkit start
+                 CraftWorld world = ((WorldServer) this).getWorld();
+-                if (world != null) {
++				if (world != null && !((WorldServer)this).stopPhysicsEvent) { // Parcot - Option to disable BlockPhsyicsEvent  for redstone
+                     BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), CraftMagicNumbers.getId(block));
+                     this.getServer().getPluginManager().callEvent(event);
+ 
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 8752955..bdeb29f 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -32,6 +32,7 @@ import org.bukkit.event.weather.LightningStrikeEvent;
+ public class WorldServer extends World implements IAsyncTaskHandler {
+ 
+     private static final Logger a = LogManager.getLogger();
++	boolean stopPhysicsEvent = false; // Paper - Add option to disable BlockPhysicsEvent for redstone
+     private final MinecraftServer server;
+     public EntityTracker tracker;
+     private final PlayerChunkMap manager;
+@@ -683,12 +684,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                             try {
+                                 iblockdata.getBlock().b((World) this, nextticklistentry.a, iblockdata, this.random);
+                             } catch (Throwable throwable) {
++								stopPhysicsEvent = !paperConfig.firePhysicsEventForRedstone && (iblockdata.getBlock() instanceof BlockDiodeAbstract || iblockdata.getBlock() instanceof BlockRedstoneTorch); // Parcot - Add option to disable BlockPhysicsEvent for redstone
+                                 CrashReport crashreport = CrashReport.a(throwable, "Exception while ticking a block");
+                                 CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Block being ticked");
+ 
+                                 CrashReportSystemDetails.a(crashreportsystemdetails, nextticklistentry.a, iblockdata);
+                                 throw new ReportedException(crashreport);
+-                            }
++                            } finally { stopPhysicsEvent = false; } // Parcot - Add option for disabling BlockPhysicsEvent for redstone
+                         }
+                         timing.stopTiming(); // Spigot
+                     } else {
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 67e56df..e910431 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -408,4 +408,10 @@ public class PaperSpigotWorldConfig
+     {
+         disableTeleportationSuffocationCheck = getBoolean("disable-teleportation-suffocation-check", false);
+     }
++
++    public boolean firePhysicsEventForRedstone;
++    private void firePhysicsEventForRedstone()
++    {
++        firePhysicsEventForRedstone = getBoolean("fire-physics-event-for-redstone", false);
++    }
+ }
+-- 
+2.8.2
+
