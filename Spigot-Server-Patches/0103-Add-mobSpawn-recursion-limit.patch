@@ -1,11 +1,11 @@
-From f39c28a062dcb6a97bad9499692ce36f49e48461 Mon Sep 17 00:00:00 2001
+From cc36ea45d4cb7546054b80356b892370d935525c Mon Sep 17 00:00:00 2001
 From: frash23 <jacob@bytesizedpacket.com>
-Date: Mon, 16 May 2016 23:17:04 +0200
+Date: Thu, 19 May 2016 12:44:12 +0200
 Subject: [PATCH] Add mobSpawn recursion limit
 
 
 diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
-index 284f4bf..04ea8eb 100644
+index 284f4bf..f64fabf 100644
 --- a/src/main/java/net/minecraft/server/SpawnerCreature.java
 +++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
 @@ -12,6 +12,8 @@ import org.bukkit.craftbukkit.util.LongHashSet;
@@ -17,20 +17,45 @@ index 284f4bf..04ea8eb 100644
  
  public final class SpawnerCreature {
  
-@@ -64,8 +66,11 @@ public final class SpawnerCreature {
-                     b0 = ( b0 > 8 ) ? 8 : b0;
-                     // Spigot End
+@@ -66,6 +68,7 @@ public final class SpawnerCreature {
  
-+                    int tries = 0;
                      for (int i1 = -b0; i1 <= b0; ++i1) {
                          for (k = -b0; k <= b0; ++k) {
-+							if(++tries > PaperSpigotConfig.maxMobSpawnTries) break;
 +
                              boolean flag3 = i1 == -b0 || i1 == b0 || k == -b0 || k == b0;
                              // CraftBukkit start - use LongHash and LongHashSet
                              // ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i1 + l, k + j);
+@@ -123,8 +126,9 @@ public final class SpawnerCreature {
+                         Iterator iterator1 = this.b.iterator();
+ 
+                         int moblimit = (limit * i / 256) - mobcnt + 1; // Spigot - up to 1 more than limit
++                    	int tries = 0;
+                         label115:
+-                        while (iterator1.hasNext() && (moblimit > 0)) { // Spigot - while more allowed
++                        while (iterator1.hasNext() && (moblimit > 0) && (++tries > PaperSpigotConfig.maxMobSpawnTries)) { // Spigot - while more allowed
+                             // CraftBukkit start = use LongHash and LongObjectHashMap
+                             long key = ((Long) iterator1.next()).longValue();
+                             BlockPosition blockposition1 = getRandomPosition(worldserver, LongHash.msw(key), LongHash.lsw(key));
+@@ -138,7 +142,7 @@ public final class SpawnerCreature {
+                                 int l2 = 0;
+                                 int i3 = 0;
+ 
+-                                while (i3 < 3) {
++                                while (i3 < 3 && (++tries > PaperSpigotConfig.maxMobSpawnTries)) {
+                                     int j3 = i2;
+                                     int k3 = j2;
+                                     int l3 = k2;
+@@ -147,7 +151,7 @@ public final class SpawnerCreature {
+                                     GroupDataEntity groupdataentity = null;
+                                     int i4 = 0;
+ 
+-                                    while (true) {
++                                    while (true && (++tries > PaperSpigotConfig.maxMobSpawnTries)) {
+                                         if (i4 < 4) {
+                                             label108: {
+                                                 j3 += worldserver.random.nextInt(b1) - worldserver.random.nextInt(b1);
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-index d6d9899..c729ada 100644
+index d6d9899..d3555ef 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 @@ -222,4 +222,10 @@ public class PaperSpigotConfig
@@ -41,7 +66,7 @@ index d6d9899..c729ada 100644
 +    public static int maxMobSpawnTries;
 +    private static void maxMobSpawnTries()
 +    {
-+        maxMobSpawnTries = getInt("max-mobspawn-tries", 80);
++        maxMobSpawnTries = getInt("max-mobspawn-tries", 100);
 +    }
  }
 -- 
